@@ -1,79 +1,123 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Элементы
     const screens = document.querySelectorAll('.screen');
     const dateInput = document.getElementById('dateInput');
     const connectBtn = document.getElementById('connectBtn');
     const errorMsg = document.getElementById('errorMsg');
-    const musicToggle = document.getElementById('musicToggle');
-    const backgroundMusic = document.getElementById('backgroundMusic');
     const fisherShadow = document.getElementById('fisher-shadow');
     
-    // Правильная дата (замените на реальную дату рождения)
+    // Правильная дата (ЗАМЕНИТЕ на настоящую дату рождения в формате ДДММГОДГ)
     const correctDate = '19032005';
     
-    // Текущий экран
     let currentScreen = 0;
-    
-    // Инициализация
+    let isScrolling = false;
+    let touchStartY = 0;
+
     function init() {
-        // Показать первый экран
         showScreen(0);
+        setupScrollHandlers();
+        setupTouchHandlers();
         
-        // Настройка музыки
-        setupMusic();
-        
-        // Настройка анимаций при скролле
-        setupScrollAnimations();
+        // Показать все экраны в DOM для отладки
+        console.log('Всего экранов:', screens.length);
+        screens.forEach((screen, i) => {
+            console.log(`Экран ${i}:`, screen.id);
+        });
     }
     
-    // Показать определенный экран
     function showScreen(index) {
+        if (index < 0 || index >= screens.length) return;
+        
         screens.forEach((screen, i) => {
             screen.classList.toggle('active', i === index);
         });
         currentScreen = index;
         
         // Особые действия для определенных экранов
-        if (index === 4) { // Вердикт
+        if (index === 4) {
             setTimeout(() => {
-                fisherShadow.classList.add('active');
+                if (fisherShadow) fisherShadow.classList.add('active');
             }, 2000);
+        }
+        
+        console.log('Переключено на экран:', index);
+    }
+    
+    function nextScreen() {
+        if (currentScreen < screens.length - 1) {
+            showScreen(currentScreen + 1);
         }
     }
     
-    // Настройка музыки
-    function setupMusic() {
-        let musicPlaying = false;
+    function prevScreen() {
+        if (currentScreen > 0) {
+            showScreen(currentScreen - 1);
+        }
+    }
+    
+    function setupScrollHandlers() {
+        let scrollTimeout;
         
-        musicToggle.addEventListener('click', function() {
-            if (musicPlaying) {
-                backgroundMusic.pause();
-                musicToggle.textContent = '🔇';
-            } else {
-                backgroundMusic.play().catch(e => {
-                    console.log("Автовоспроизведение заблокировано. Нажмите на кнопку для включения звука.");
-                });
-                musicToggle.textContent = '🔊';
+        window.addEventListener('wheel', function(e) {
+            if (isScrolling) return;
+            
+            clearTimeout(scrollTimeout);
+            
+            // Более чувствительный скролл
+            if (e.deltaY > 50) { // Скролл вниз
+                nextScreen();
+                isScrolling = true;
+            } else if (e.deltaY < -50) { // Скролл вверх
+                prevScreen();
+                isScrolling = true;
             }
-            musicPlaying = !musicPlaying;
+            
+            scrollTimeout = setTimeout(() => {
+                isScrolling = false;
+            }, 800);
+        }, { passive: true });
+        
+        // Навигация клавишами
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+                nextScreen();
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                prevScreen();
+                e.preventDefault();
+            }
         });
     }
     
-    // Проверка даты
+    function setupTouchHandlers() {
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', function(e) {
+            if (isScrolling) return;
+            
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            
+            // Чувствительность для свайпов
+            if (diff > 50) { // Свайп вверх
+                nextScreen();
+            } else if (diff < -50) { // Свайп вниз
+                prevScreen();
+            }
+        }, { passive: true });
+    }
+    
+    // Обработчик кнопки подключения
     connectBtn.addEventListener('click', function() {
         const enteredDate = dateInput.value.trim();
         
         if (enteredDate === correctDate) {
-            // Правильная дата - переходим к следующему экрану
             showScreen(1);
-            // Прокручиваем к верху
-            window.scrollTo(0, 0);
         } else {
-            // Неправильная дата - показываем ошибку
             errorMsg.textContent = "> ОШИБКА: НЕВЕРНЫЙ КЛЮЧ ДОСТУПА";
             errorMsg.style.display = 'block';
             
-            // Анимация ошибки
             dateInput.style.animation = 'shake 0.5s';
             setTimeout(() => {
                 dateInput.style.animation = '';
@@ -81,51 +125,55 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Анимация встряски для ошибки
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+    // Также разрешаем ввод по Enter
+    dateInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            connectBtn.click();
         }
-    `;
-    document.head.appendChild(style);
+    });
     
-    // Навигация между экранами при скролле
-    function setupScrollAnimations() {
-        let isScrolling = false;
+    // Добавляем кнопки навигации для мобильных
+    createMobileNav();
+    
+    function createMobileNav() {
+        const navHTML = `
+            <div class="mobile-nav">
+                <button class="nav-btn prev-btn">↑</button>
+                <div class="nav-dots"></div>
+                <button class="nav-btn next-btn">↓</button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', navHTML);
         
-        window.addEventListener('wheel', function(e) {
-            if (isScrolling) return;
-            
-            isScrolling = true;
-            
-            if (e.deltaY > 0 && currentScreen < screens.length - 1) {
-                // Скролл вниз - следующий экран
-                showScreen(currentScreen + 1);
-            } else if (e.deltaY < 0 && currentScreen > 0) {
-                // Скролл вверх - предыдущий экран
-                showScreen(currentScreen - 1);
-            }
-            
-            setTimeout(() => {
-                isScrolling = false;
-            }, 1000);
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        const dotsContainer = document.querySelector('.nav-dots');
+        
+        // Создаем точки-индикаторы
+        screens.forEach((_, i) => {
+            const dot = document.createElement('span');
+            dot.className = `nav-dot ${i === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => showScreen(i));
+            dotsContainer.appendChild(dot);
         });
         
-        // Также добавляем навигацию по клавишам
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowDown' && currentScreen < screens.length - 1) {
-                showScreen(currentScreen + 1);
-                e.preventDefault();
-            } else if (e.key === 'ArrowUp' && currentScreen > 0) {
-                showScreen(currentScreen - 1);
-                e.preventDefault();
-            }
+        prevBtn.addEventListener('click', prevScreen);
+        nextBtn.addEventListener('click', nextScreen);
+        
+        // Обновляем точки при смене экрана
+        const observer = new MutationObserver(() => {
+            document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentScreen);
+            });
+        });
+        
+        observer.observe(document.body, { 
+            childList: false, 
+            subtree: false,
+            attributes: true,
+            attributeFilter: ['class']
         });
     }
     
-    // Запуск инициализации
     init();
 });
