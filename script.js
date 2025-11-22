@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMsg = document.getElementById('errorMsg');
     const fisherShadow = document.getElementById('fisher-shadow');
     
-    // Правильная дата (ЗАМЕНИТЕ на настоящую дату рождения в формате ДДММГОДГ)
+    // Правильная дата
     const correctDate = '22112006';
     
     let currentScreen = 0;
@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showScreen(0);
         setupScrollHandlers();
         setupTouchHandlers();
+        setupMusic();
         
         console.log('Всего экранов:', screens.length);
     }
@@ -70,10 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
             clearTimeout(scrollTimeout);
             
             // Более чувствительный скролл
-            if (e.deltaY > 50) { // Скролл вниз
+            if (e.deltaY > 50) {
                 nextScreen();
                 isScrolling = true;
-            } else if (e.deltaY < -50) { // Скролл вверх
+            } else if (e.deltaY < -50) {
                 prevScreen();
                 isScrolling = true;
             }
@@ -109,9 +110,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const diff = touchStartY - touchEndY;
             
             // Чувствительность для свайпов
-            if (diff > 50) { // Свайп вверх
+            if (diff > 50) {
                 nextScreen();
-            } else if (diff < -50) { // Свайп вниз
+            } else if (diff < -50) {
                 prevScreen();
             }
         }, { passive: true });
@@ -148,9 +149,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function createMobileNav() {
         const navHTML = `
             <div class="mobile-nav">
-                <button class="nav-btn prev-btn">↑</button>
+                <button class="nav-btn prev-btn" aria-label="Предыдущий экран">↑</button>
                 <div class="nav-dots"></div>
-                <button class="nav-btn next-btn">↓</button>
+                <button class="nav-btn next-btn" aria-label="Следующий экран">↓</button>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', navHTML);
@@ -161,15 +162,43 @@ document.addEventListener('DOMContentLoaded', function() {
         const dotsContainer = document.querySelector('.nav-dots');
         
         // Создаем точки-индикаторы
-        for (let i = 1; i < screens.length; i++) { // Начинаем с 1, пропускаем экран входа
+        for (let i = 1; i < screens.length; i++) {
             const dot = document.createElement('span');
             dot.className = `nav-dot ${i === 1 ? 'active' : ''}`;
-            dot.addEventListener('click', () => showScreen(i));
+            dot.setAttribute('aria-label', `Перейти к экрану ${i}`);
+            
+            // Улучшенная обработка кликов для мобильных
+            dot.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showScreen(i);
+            }, false);
+            
+            // Добавляем тач-события
+            dot.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                showScreen(i);
+            }, false);
+            
             dotsContainer.appendChild(dot);
         }
         
-        prevBtn.addEventListener('click', prevScreen);
-        nextBtn.addEventListener('click', nextScreen);
+        // Улучшенные обработчики для кнопок
+        const handleNav = (handler) => {
+            return function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                handler();
+                // Вибрация на мобильных (если поддерживается)
+                if (navigator.vibrate) navigator.vibrate(10);
+            };
+        };
+        
+        prevBtn.addEventListener('click', handleNav(prevScreen));
+        nextBtn.addEventListener('click', handleNav(nextScreen));
+        prevBtn.addEventListener('touchend', handleNav(prevScreen));
+        nextBtn.addEventListener('touchend', handleNav(nextScreen));
         
         updateNavDots();
     }
@@ -179,9 +208,71 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const dots = document.querySelectorAll('.nav-dot');
         dots.forEach((dot, i) => {
-            // i соответствует экрану i+1 (потому что пропускаем экран 0)
             dot.classList.toggle('active', (i + 1) === currentScreen);
         });
+    }
+    
+    // Функция для управления музыкой
+    function setupMusic() {
+        const musicToggle = document.getElementById('musicToggle');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        
+        let musicPlaying = false;
+        let userInteracted = false;
+        
+        // Функция для переключения музыки
+        function toggleMusic() {
+            if (!userInteracted) {
+                userInteracted = true;
+            }
+            
+            if (musicPlaying) {
+                backgroundMusic.pause();
+                musicToggle.textContent = '🔇';
+                musicPlaying = false;
+            } else {
+                backgroundMusic.play().then(() => {
+                    musicToggle.textContent = '🔊';
+                    musicPlaying = true;
+                }).catch(error => {
+                    console.log('Ошибка воспроизведения музыки:', error);
+                    musicToggle.textContent = '❌';
+                    musicToggle.title = 'Ошибка воспроизведения музыки';
+                });
+            }
+        }
+        
+        // Обработчик клика для кнопки музыки
+        musicToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMusic();
+        });
+        
+        // Обработчик тача для мобильных
+        musicToggle.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMusic();
+        });
+        
+        // Пытаемся включить музыку автоматически после первого взаимодействия с сайтом
+        function enableMusicAfterInteraction() {
+            if (!userInteracted) {
+                userInteracted = true;
+                // Можно попробовать включить музыку автоматически
+                setTimeout(() => {
+                    if (!musicPlaying) {
+                        toggleMusic();
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Слушаем любое взаимодействие с сайтом
+        document.addEventListener('click', enableMusicAfterInteraction);
+        document.addEventListener('touchstart', enableMusicAfterInteraction);
+        document.addEventListener('keydown', enableMusicAfterInteraction);
     }
     
     init();
