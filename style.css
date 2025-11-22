@@ -1,0 +1,489 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --cream: #f8f4f0;
+    --deep-purple: #5a4b6c;
+    --lilac: #c4a8d1;
+    --chocolate: #3a2c2e;
+    --gold: #e6d5b8;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--chocolate);
+    overflow-x: hidden;
+    background-color: var(--cream);
+}
+
+h1, h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 500;
+}
+
+.screen {
+    min-height: 100vh;
+    display: none;
+    position: relative;
+}
+
+.screen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Фон с видео */
+.background-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.background-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(248, 244, 240, 0.7);
+}
+
+.overlay-dark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(58, 44, 46, 0.6);
+}
+
+.overlay-verdict {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(90, 75, 108, 0.3);
+}
+
+/* Терминал */
+.terminal {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    padding: 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.terminal-header {
+    background: rgba(90, 75, 108, 0.8);
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.terminal-dots {
+    display: flex;
+    gap: 8px;
+    margin-right: 15px;
+}
+
+.terminal-dots span {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.terminal-content {
+    padding: 30px;
+}
+
+.typewriter {
+    font-family: 'Courier New', monospace;
+    margin-bottom: 15px;
+    opacity: 0;
+    animation: typewriter 2s steps(40) forwards;
+}
+
+.delay-1 {
+    animation-delay: 1s;
+}
+
+@keyframes typewriter {
+    from { opacity: 1; width: 0; }
+    to { opacity: 1; width: 100%; }
+}
+
+.input-group {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#dateInput {
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--lilac);
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    color: var(--chocolate);
+}
+
+#dateInput::placeholder {
+    color: rgba(90, 75, 108, 0.6);
+}
+
+#connectBtn {
+    padding: 12px 25px;
+    background: var(--deep-purple);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#connectBtn:hover {
+    background: var(--lilac);
+    transform: translateY(-2px);
+}
+
+.error {
+    color: #ff6b6b;
+    margin-top: 10px;
+    font-family: 'Courier New', monospace;
+    display: none;
+}
+
+/* Контейнер для контента */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 0;
+}
+
+/* Досье */
+.case-file h1 {
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--deep-purple);
+    font-size: 2.5rem;
+}
+
+.name-highlight {
+    color: var(--lilac);
+}
+
+.evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.evidence-item {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 25px;
+    border-radius: 8px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.evidence-item:hover {
+    transform: translateX(10px);
+    border-color: var(--lilac);
+}
+
+.evidence-number {
+    font-family: 'Courier New', monospace;
+    color: var(--deep-purple);
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.butterfly-hover {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.evidence-item:hover .butterfly-hover {
+    opacity: 1;
+}
+
+/* Фото-доказательства */
+#evidence h2 {
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--deep-purple);
+    font-size: 2.2rem;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.photo-frame {
+    position: relative;
+    border: 2px solid var(--gold);
+    border-radius: 4px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.photo-frame:hover {
+    transform: rotate(1deg) scale(1.02);
+    border-color: var(--lilac);
+}
+
+.photo-container {
+    position: relative;
+    overflow: hidden;
+    height: 300px;
+}
+
+.photo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.double-exposure::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(196, 168, 209, 0.2), rgba(90, 75, 108, 0.2));
+    mix-blend-mode: overlay;
+    z-index: 1;
+}
+
+.photo-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(58, 44, 46, 0.8);
+    color: white;
+    padding: 10px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.photo-frame:hover .photo-overlay {
+    transform: translateY(0);
+}
+
+/* Показания свидетелей */
+#witnesses {
+    color: white;
+}
+
+#witnesses h2 {
+    text-align: center;
+    margin-bottom: 50px;
+    font-size: 2.2rem;
+}
+
+.testimony-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.testimony-card {
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stamp {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: var(--gold);
+    border: 1px dashed var(--gold);
+    padding: 5px 8px;
+    transform: rotate(5deg);
+}
+
+/* Вердикт */
+#verdict {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.verdict-content {
+    color: white;
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.verdict-title {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.verdict-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+.verdict-final {
+    font-size: 1.8rem;
+    margin-bottom: 40px;
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+}
+
+.birthday-wish h2 {
+    font-size: 2.5rem;
+    color: var(--lilac);
+}
+
+/* Тень Фишера */
+.fisher-shadow {
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 200px;
+    height: 300px;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.5));
+    clip-path: polygon(0 0, 100% 20%, 100% 100%, 0 80%);
+    opacity: 0;
+    transition: opacity 3s ease;
+}
+
+.fisher-shadow.active {
+    opacity: 1;
+    animation: fisherWalk 8s ease forwards;
+}
+
+.butterfly-final {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    font-size: 2rem;
+    opacity: 0;
+    animation: butterflyFly 4s ease 4s forwards;
+}
+
+@keyframes fisherWalk {
+    0% { transform: translateX(0) translateY(0); }
+    100% { transform: translateX(-150px) translateY(-150px); }
+}
+
+@keyframes butterflyFly {
+    0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
+    50% { opacity: 1; transform: translate(-100px, -100px) scale(1); }
+    100% { opacity: 0; transform: translate(-200px, -200px) scale(0.5); }
+}
+
+/* Управление музыкой */
+.music-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(90, 75, 108, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 1.2rem;
+    backdrop-filter: blur(10px);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .terminal-content {
+        padding: 20px;
+    }
+    
+    .case-file h1, #evidence h2, #witnesses h2 {
+        font-size: 1.8rem;
+    }
+    
+    .verdict-title {
+        font-size: 2rem;
+    }
+    
+    .verdict-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .photo-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .testimony-cards {
+        grid-template-columns: 1fr;
+    }
+}
