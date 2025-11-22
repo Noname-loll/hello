@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const dateInput = document.getElementById('dateInput');
     const connectBtn = document.getElementById('connectBtn');
     const errorMsg = document.getElementById('errorMsg');
-    const fisherShadow = document.getElementById('fisher-shadow');
     
     // Правильная дата
     const correctDate = '22112006';
@@ -37,13 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 mobileNav.style.display = 'flex';
             }
-        }
-        
-        // Особые действия для определенных экранов
-        if (index === 4) {
-            setTimeout(() => {
-                if (fisherShadow) fisherShadow.classList.add('active');
-            }, 2000);
         }
         
         console.log('Переключено на экран:', index);
@@ -218,14 +210,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const backgroundMusic = document.getElementById('backgroundMusic');
         
         let musicPlaying = false;
-        let userInteracted = false;
         
         // Функция для переключения музыки
         function toggleMusic() {
-            if (!userInteracted) {
-                userInteracted = true;
-            }
-            
             if (musicPlaying) {
                 backgroundMusic.pause();
                 musicToggle.textContent = '🔇';
@@ -238,6 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Ошибка воспроизведения музыки:', error);
                     musicToggle.textContent = '❌';
                     musicToggle.title = 'Ошибка воспроизведения музыки';
+                    // Показываем сообщение пользователю
+                    alert('Не удалось воспроизвести музыку. Проверьте файл музыки.');
                 });
             }
         }
@@ -256,23 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleMusic();
         });
         
-        // Пытаемся включить музыку автоматически после первого взаимодействия с сайтом
-        function enableMusicAfterInteraction() {
-            if (!userInteracted) {
-                userInteracted = true;
-                // Можно попробовать включить музыку автоматически
-                setTimeout(() => {
-                    if (!musicPlaying) {
-                        toggleMusic();
-                    }
-                }, 1000);
-            }
-        }
-        
-        // Слушаем любое взаимодействие с сайтом
-        document.addEventListener('click', enableMusicAfterInteraction);
-        document.addEventListener('touchstart', enableMusicAfterInteraction);
-        document.addEventListener('keydown', enableMusicAfterInteraction);
+        // Автоматически показываем кнопку музыки
+        musicToggle.style.display = 'flex';
     }
     
     init();
