@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fisherShadow = document.getElementById('fisher-shadow');
     
     // Правильная дата (ЗАМЕНИТЕ на настоящую дату рождения в формате ДДММГОДГ)
-    const correctDate = '19032005';
+    const correctDate = '22112006';
     
     let currentScreen = 0;
     let isScrolling = false;
