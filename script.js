@@ -11,17 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentScreen = 0;
     let isScrolling = false;
     let touchStartY = 0;
+    let mobileNav = null;
 
     function init() {
         showScreen(0);
         setupScrollHandlers();
         setupTouchHandlers();
         
-        // Показать все экраны в DOM для отладки
         console.log('Всего экранов:', screens.length);
-        screens.forEach((screen, i) => {
-            console.log(`Экран ${i}:`, screen.id);
-        });
     }
     
     function showScreen(index) {
@@ -32,6 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         currentScreen = index;
         
+        // Показываем навигацию только НЕ на первом экране
+        if (mobileNav) {
+            if (index === 0) {
+                mobileNav.style.display = 'none';
+            } else {
+                mobileNav.style.display = 'flex';
+            }
+        }
+        
         // Особые действия для определенных экранов
         if (index === 4) {
             setTimeout(() => {
@@ -40,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log('Переключено на экран:', index);
+        updateNavDots();
     }
     
     function nextScreen() {
@@ -58,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let scrollTimeout;
         
         window.addEventListener('wheel', function(e) {
-            if (isScrolling) return;
+            if (isScrolling || currentScreen === 0) return;
             
             clearTimeout(scrollTimeout);
             
@@ -76,8 +83,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 800);
         }, { passive: true });
         
-        // Навигация клавишами
+        // Навигация клавишами (только не на первом экране)
         document.addEventListener('keydown', function(e) {
+            if (currentScreen === 0) return;
+            
             if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
                 nextScreen();
                 e.preventDefault();
@@ -94,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { passive: true });
         
         document.addEventListener('touchend', function(e) {
-            if (isScrolling) return;
+            if (isScrolling || currentScreen === 0) return;
             
             const touchEndY = e.changedTouches[0].clientY;
             const diff = touchStartY - touchEndY;
@@ -114,6 +123,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (enteredDate === correctDate) {
             showScreen(1);
+            // Создаем навигацию только после успешного входа
+            if (!mobileNav) {
+                createMobileNav();
+            }
         } else {
             errorMsg.textContent = "> ОШИБКА: НЕВЕРНЫЙ КЛЮЧ ДОСТУПА";
             errorMsg.style.display = 'block';
@@ -132,9 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Добавляем кнопки навигации для мобильных
-    createMobileNav();
-    
     function createMobileNav() {
         const navHTML = `
             <div class="mobile-nav">
@@ -145,33 +155,32 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         document.body.insertAdjacentHTML('beforeend', navHTML);
         
+        mobileNav = document.querySelector('.mobile-nav');
         const prevBtn = document.querySelector('.prev-btn');
         const nextBtn = document.querySelector('.next-btn');
         const dotsContainer = document.querySelector('.nav-dots');
         
         // Создаем точки-индикаторы
-        screens.forEach((_, i) => {
+        for (let i = 1; i < screens.length; i++) { // Начинаем с 1, пропускаем экран входа
             const dot = document.createElement('span');
-            dot.className = `nav-dot ${i === 0 ? 'active' : ''}`;
+            dot.className = `nav-dot ${i === 1 ? 'active' : ''}`;
             dot.addEventListener('click', () => showScreen(i));
             dotsContainer.appendChild(dot);
-        });
+        }
         
         prevBtn.addEventListener('click', prevScreen);
         nextBtn.addEventListener('click', nextScreen);
         
-        // Обновляем точки при смене экрана
-        const observer = new MutationObserver(() => {
-            document.querySelectorAll('.nav-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentScreen);
-            });
-        });
+        updateNavDots();
+    }
+    
+    function updateNavDots() {
+        if (!mobileNav) return;
         
-        observer.observe(document.body, { 
-            childList: false, 
-            subtree: false,
-            attributes: true,
-            attributeFilter: ['class']
+        const dots = document.querySelectorAll('.nav-dot');
+        dots.forEach((dot, i) => {
+            // i соответствует экрану i+1 (потому что пропускаем экран 0)
+            dot.classList.toggle('active', (i + 1) === currentScreen);
         });
     }
     
